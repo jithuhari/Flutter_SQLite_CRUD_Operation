@@ -160,6 +160,40 @@ class _ListPageState extends State<ListPage> {
   }
 
 
+  //Delete
+
+  _deleteShowForm(BuildContext context , categoryId){
+    return showDialog(
+      context: context, 
+      barrierDismissible: true, 
+      builder: (param){
+        return AlertDialog(
+          actions: [
+            FlatButton(
+              color: Colors.green,
+              onPressed: ()=>
+              Navigator.pop(context), 
+              child: Text('cancel')),
+            FlatButton(
+              color: Colors.red,
+              onPressed: () async{
+
+                var result = await _categoryService.deleteCategory(categoryId);
+                if (result > 0){
+                  Navigator.pop(context);
+                  getAllCategories();
+                  _showSuccessSnackBar(Text('Deleted'));
+                }  
+              },
+              child: Text('Delete'))
+          ],
+          title: Text('Are you sure to delete ?'),
+          
+        );
+    } );
+  }
+
+
     //Update SnackBar
   _showSuccessSnackBar(message){
     var _snackBar = SnackBar(content: message);
@@ -185,7 +219,9 @@ class _ListPageState extends State<ListPage> {
                 children: [
                 Text(_CategoryList[index].name),
                 IconButton(
-                  onPressed: (){},
+                  onPressed: (){
+                    _deleteShowForm(context ,_CategoryList[index].id);
+                  },
                   icon: Icon(Icons.delete))
 
               ],),
