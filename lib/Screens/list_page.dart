@@ -29,6 +29,8 @@ class _ListPageState extends State<ListPage> {
     getAllCategories();
   }
 
+  final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
+
   getAllCategories() async {
     _CategoryList = <Category>[];
     var categories = await _categoryService.readCategory();
@@ -73,7 +75,10 @@ class _ListPageState extends State<ListPage> {
                 _category.name = _categoryNameController.text;
                 _category.description = _categoryDescriptionController.text;
                 var result = await _categoryService.saveCategory(_category);
-                print(result);
+                if (result > 0){
+                  Navigator.pop(context);
+                  getAllCategories();
+                }  
               }, child: Text('Save'))
           ],
           title: Text('List'),
@@ -112,15 +117,23 @@ class _ListPageState extends State<ListPage> {
           actions: [
             FlatButton(
               color: Colors.red,
-              onPressed: ()=>Navigator.pop(context), child: Text('cancel')),
+              onPressed: ()=>
+              Navigator.pop(context), 
+              child: Text('cancel')),
             FlatButton(
               color: Colors.blue,
               onPressed: () async{
-                _category.name = _categoryNameController.text;
-                _category.description = _categoryDescriptionController.text;
-                var result = await _categoryService.saveCategory(_category);
-                print(result);
-              }, child: Text('update'))
+                _category.id = category[0]['id'];
+                _category.name = _editCategoryNameController.text;
+                _category.description = _editCategoryDescriptionController.text;
+                var result = await _categoryService.updateCategory(_category);
+                if (result > 0){
+                  Navigator.pop(context);
+                  getAllCategories();
+                  _showSuccessSnackBar(Text('updated'));
+                }  
+              },
+              child: Text('update'))
           ],
           title: Text('Edit List'),
           content: SingleChildScrollView(
@@ -146,10 +159,18 @@ class _ListPageState extends State<ListPage> {
     } );
   }
 
+
+    //Update SnackBar
+  _showSuccessSnackBar(message){
+    var _snackBar = SnackBar(content: message);
+    _globalKey.currentState!.showSnackBar(_snackBar);
+  }
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
+      key: _globalKey,
       appBar: AppBar(
         title: Text('List'),
       ),
